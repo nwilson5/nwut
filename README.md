@@ -47,6 +47,28 @@ pip install -e ".[dev]"
 
 The editable install (`-e`) means changes to source files take effect immediately — no reinstall needed.
 
+### Jupyter notebooks (local scratch only)
+
+Notebooks live in `notebooks/` — gitignored, never committed. Uses a dedicated conda env registered as a Jupyter kernel.
+
+**One-time setup:**
+
+```bash
+conda create -n nwut python=3.14 -y
+conda activate nwut
+pip install -e ".[dev,notebook]"
+python -m ipykernel install --user --name nwut --display-name "nwut"
+```
+
+**Launch:**
+
+```bash
+jupyter lab
+# select "nwut" kernel in the notebook UI
+```
+
+You can launch from any conda env — the `nwut` kernel will appear in the list. A starter notebook is at `notebooks/gemini.ipynb`. It loads `.env` from the repo root explicitly so it works without direnv active.
+
 ---
 
 ## Environment variables

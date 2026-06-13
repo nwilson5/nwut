@@ -15,6 +15,9 @@ dependencies = [
 dev = ["pytest", "pytest-mock", "ruff"]
 notebook = ["jupyterlab", "python-dotenv", "ipykernel"]
 
+[tool.setuptools.packages.find]
+include = ["nwut*"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py314"
