@@ -12,7 +12,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-mock", "ruff"]
+dev = ["pytest", "pytest-mock", "ruff", "python-dotenv"]
 notebook = ["jupyterlab", "python-dotenv", "ipykernel", "ipywidgets"]
 
 [tool.setuptools.packages.find]
@@ -27,3 +27,5 @@ select = ["E", "F", "I"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["integration: live API calls, requires env vars set"]
+addopts = "-m 'not integration'"

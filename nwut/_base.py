@@ -1,10 +1,9 @@
 import logging
 from collections.abc import Callable
-from typing import Any
 
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
-from nwut.errors import TransientError, RateLimitError
+from nwut.errors import RateLimitError, TransientError
 
 logger = logging.getLogger(__name__)
 
