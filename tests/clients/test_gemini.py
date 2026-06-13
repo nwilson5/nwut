@@ -1,5 +1,6 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from nwut.clients.gemini import GeminiClient
 from nwut.errors import AuthError, RateLimitError
@@ -51,3 +52,49 @@ def test_generate_raises_rate_limit_error_on_client_error_429(gemini_env):
         client = GeminiClient()
         with pytest.raises(RateLimitError):
             client.generate("test")
+
+
+def test_generate_raises_transient_error_on_server_error(gemini_env):
+    from google.genai.errors import ServerError
+
+    from nwut.errors import TransientError
+
+    exc = ServerError(500, "internal error")
+
+    with patch("nwut.clients.gemini.genai") as mock_genai:
+        mock_genai.Client.return_value.models.generate_content.side_effect = exc
+        client = GeminiClient()
+        with pytest.raises(TransientError):
+            client.generate("test")
+
+
+def test_generate_structured_returns_json_string(gemini_env):
+    from dataclasses import dataclass
+
+    @dataclass
+    class Result:
+        value: str
+
+    mock_response = MagicMock()
+    mock_response.text = '{"value": "hello"}'
+
+    with patch("nwut.clients.gemini.genai") as mock_genai:
+        mock_genai.Client.return_value.models.generate_content.return_value = mock_response
+        client = GeminiClient()
+        result = client.generate_structured("give me a result", schema=Result)
+
+    assert result == '{"value": "hello"}'
+
+
+def test_generate_structured_raises_transient_error_on_server_error(gemini_env):
+    from google.genai.errors import ServerError
+
+    from nwut.errors import TransientError
+
+    exc = ServerError(503, "service unavailable")
+
+    with patch("nwut.clients.gemini.genai") as mock_genai:
+        mock_genai.Client.return_value.models.generate_content.side_effect = exc
+        client = GeminiClient()
+        with pytest.raises(TransientError):
+            client.generate_structured("test", schema=object)

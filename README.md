@@ -123,10 +123,10 @@ result = client.generate_structured(
 print(result)
 ```
 
-The default model is `gemini-2.0-flash`. Pass `model=` to override:
+The default model is `gemini-2.5-flash`. Pass `model=` to override:
 
 ```python
-client = GeminiClient(model="gemini-1.5-pro")
+client = GeminiClient(model="gemini-2.5-pro")
 ```
 
 ### Error handling
@@ -158,11 +158,12 @@ Transient errors and rate limit errors are retried automatically with exponentia
 # Unit tests — mocked, no API key needed, runs in CI
 pytest
 
-# Integration tests — real API calls, requires GEMINI_API_KEY in env
+# Integration tests — real API calls, requires GEMINI_API_KEY
+# .env is loaded automatically, direnv not required
 pytest -m integration
 
-# Lint
-ruff check .
+# Lint + format
+ruff check . && ruff format --check .
 ```
 
 Integration tests live in files named `test_*_integration.py` and are marked `@pytest.mark.integration`. They never run in CI.
@@ -183,7 +184,7 @@ python scratch.py
 4. Add `tests/clients/test_<name>.py` (mocked) and optionally `test_<name>_integration.py`
 5. Add the SDK as a dependency in `pyproject.toml`
 6. Export the client from `nwut/__init__.py`
-7. Bump the minor version, update `CHANGELOG.md`, push a new tag
+7. Add entry to `CHANGELOG.md`, run `make release v=<version>`
 
 ---
 
@@ -200,11 +201,9 @@ Follows semantic versioning. Releases are git tags — not published to PyPI.
 Release process:
 
 ```bash
-# 1. Update version in pyproject.toml
-# 2. Add entry to CHANGELOG.md
-git commit -m "chore: release v0.2.0"
-git tag v0.2.0
-git push origin main --tags
+# 1. Add entry to CHANGELOG.md
+# 2. Run:
+make release v=0.2.0
 ```
 
 Consuming repos update their pinned tag in `requirements.in` and re-run `uv pip compile` to pick up the new version.

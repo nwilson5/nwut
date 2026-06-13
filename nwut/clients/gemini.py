@@ -5,7 +5,7 @@ from google.genai import errors as genai_errors
 from google.genai import types
 
 from nwut._base import BaseClient, with_retry
-from nwut.errors import AuthError, RateLimitError, TransientError
+from nwut.errors import TransientError
 
 
 class GeminiClient(BaseClient):
@@ -16,7 +16,7 @@ class GeminiClient(BaseClient):
     rather than at call time.
     """
 
-    DEFAULT_MODEL = "gemini-2.0-flash"
+    DEFAULT_MODEL = "gemini-2.5-flash"
 
     def __init__(self, model: str = DEFAULT_MODEL):
         api_key = os.environ.get("GEMINI_API_KEY")
