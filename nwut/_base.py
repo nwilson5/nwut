@@ -19,6 +19,7 @@ def with_retry(func: Callable) -> Callable:
         retry=retry_if_exception_type((TransientError, RateLimitError)),
         wait=wait_exponential(multiplier=1, min=2, max=30),
         stop=stop_after_attempt(4),
+        reraise=True,
         before_sleep=lambda rs: logger.warning(
             "retrying %s (attempt %d): %s",
             func.__name__,

@@ -7,13 +7,13 @@ name = "nwut"
 version = "0.1.0"
 requires-python = ">=3.14"
 dependencies = [
-    "google-generativeai>=0.8",
+    "google-genai>=1.0",
     "tenacity>=8",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-mock", "ruff"]
-notebook = ["jupyterlab", "python-dotenv", "ipykernel"]
+notebook = ["jupyterlab", "python-dotenv", "ipykernel", "ipywidgets"]
 
 [tool.setuptools.packages.find]
 include = ["nwut*"]

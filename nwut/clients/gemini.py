@@ -1,14 +1,15 @@
 import os
 
-import google.generativeai as genai
-from google.api_core import exceptions as google_exceptions
+from google import genai
+from google.genai import errors as genai_errors
+from google.genai import types
 
 from nwut._base import BaseClient, with_retry
-from nwut.errors import AuthError
+from nwut.errors import AuthError, RateLimitError, TransientError
 
 
 class GeminiClient(BaseClient):
-    """Thin wrapper around the Gemini generative AI SDK.
+    """Thin wrapper around the Gemini SDK (google-genai).
 
     Reads GEMINI_API_KEY from the environment. Raises EnvironmentError at
     instantiation if the key is missing, so failures surface immediately
@@ -21,50 +22,41 @@ class GeminiClient(BaseClient):
         api_key = os.environ.get("GEMINI_API_KEY")
         if not api_key:
             raise EnvironmentError("GEMINI_API_KEY is not set")
-        genai.configure(api_key=api_key)
-        self._model = genai.GenerativeModel(model)
+        self._client = genai.Client(api_key=api_key)
+        self._model = model
 
     @with_retry
     def generate(self, prompt: str) -> str:
         """Generate a text response for the given prompt."""
         try:
-            response = self._model.generate_content(prompt)
+            response = self._client.models.generate_content(
+                model=self._model,
+                contents=prompt,
+            )
             return response.text
-        except google_exceptions.PermissionDenied as exc:
-            raise AuthError(str(exc), status_code=403) from exc
-        except google_exceptions.ResourceExhausted as exc:
-            from nwut.errors import RateLimitError
-            raise RateLimitError(str(exc), status_code=429) from exc
-        except google_exceptions.ServiceUnavailable as exc:
-            from nwut.errors import TransientError
-            raise TransientError(str(exc), status_code=503) from exc
-        except Exception as exc:
-            self._normalize_error(exc)
+        except genai_errors.ClientError as exc:
+            self._normalize_error(exc, status_code=exc.code)
+        except genai_errors.ServerError as exc:
+            raise TransientError(str(exc), status_code=exc.code) from exc
 
     @with_retry
-    def generate_structured(self, prompt: str, schema: type) -> dict:
-        """Generate a response parsed into a structured dict matching schema.
+    def generate_structured(self, prompt: str, schema: type) -> str:
+        """Generate a response conforming to schema.
 
-        schema should be a dataclass or Pydantic model. The response is
-        parsed via the Gemini structured output feature.
+        schema should be a dataclass or Pydantic model. Returns the raw JSON
+        string — callers parse it into the schema type as needed.
         """
         try:
-            model = genai.GenerativeModel(
-                self._model.model_name,
-                generation_config=genai.GenerationConfig(
+            response = self._client.models.generate_content(
+                model=self._model,
+                contents=prompt,
+                config=types.GenerateContentConfig(
                     response_mime_type="application/json",
                     response_schema=schema,
                 ),
             )
-            response = model.generate_content(prompt)
             return response.text
-        except google_exceptions.PermissionDenied as exc:
-            raise AuthError(str(exc), status_code=403) from exc
-        except google_exceptions.ResourceExhausted as exc:
-            from nwut.errors import RateLimitError
-            raise RateLimitError(str(exc), status_code=429) from exc
-        except google_exceptions.ServiceUnavailable as exc:
-            from nwut.errors import TransientError
-            raise TransientError(str(exc), status_code=503) from exc
-        except Exception as exc:
-            self._normalize_error(exc)
+        except genai_errors.ClientError as exc:
+            self._normalize_error(exc, status_code=exc.code)
+        except genai_errors.ServerError as exc:
+            raise TransientError(str(exc), status_code=exc.code) from exc
