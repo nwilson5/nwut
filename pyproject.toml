@@ -13,7 +13,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-mock", "ruff"]
-notebook = ["jupyterlab", "python-dotenv"]
+notebook = ["jupyterlab", "python-dotenv", "ipykernel"]
 
 [tool.ruff]
 line-length = 100
