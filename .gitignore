@@ -10,3 +10,5 @@ dist/
 venv/
 layer/
 *.zip
+notebooks/
+scratch.py
