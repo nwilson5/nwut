@@ -33,7 +33,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 ```
 
-Transitive dependencies (`google-generativeai`, `tenacity`, etc.) are declared in `nwut/pyproject.toml` and resolved automatically — you do not need to list them in `requirements.in`.
+Transitive dependencies (`google-genai`, `tenacity`, etc.) are declared in `nwut/pyproject.toml` and resolved automatically — you do not need to list them in `requirements.in`.
 
 To upgrade nwut, update the tag in `requirements.in` and re-run `uv pip compile`.
 
