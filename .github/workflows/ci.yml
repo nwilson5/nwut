@@ -10,3 +10,4 @@ jobs:
     uses: nwilson5/cicd/.github/workflows/validate.yml@main
     with:
       working-directory: .
+      python-version: "3.14"
