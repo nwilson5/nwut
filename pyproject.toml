@@ -28,3 +28,4 @@ select = ["E", "F", "I"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = ["integration: live API calls, requires env vars set"]
+addopts = "-m 'not integration'"
